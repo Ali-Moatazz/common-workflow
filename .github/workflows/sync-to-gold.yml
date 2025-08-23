@@ -14,7 +14,7 @@ jobs:
         uses: actions/create-github-app-token@v2              # CHANGED: use v2 (current) which supports needed inputs
         with:
           app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.PRIVATE_KEY }}             # CHANGED: use the secret name from the assignment (rename in Settings if needed)
+          private-key: ${{ secrets.PEMCONTENTS }}             # CHANGED: use the secret name from the assignment (rename in Settings if needed)
           owner: Ali-Moatazz                                  # CHANGED: scope token to the installation owner
           repositories: gold                                   # CHANGED: grant token access to the 'gold' repo (no trailing '-')
           skip-token-revoke: true                              # CHANGED: keep token valid after this job so next job can use it
