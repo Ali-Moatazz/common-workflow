@@ -11,11 +11,13 @@ jobs:
       app_token: ${{ steps.app-token.outputs.token }}
     steps:
       - id: app-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v2              # CHANGED: use v2 (current) which supports needed inputs
         with:
           app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.PEMCONTENTS }}
-          repository: Ali-Moatazz/gold-
+          private-key: ${{ secrets.PRIVATE_KEY }}             # CHANGED: use the secret name from the assignment (rename in Settings if needed)
+          owner: Ali-Moatazz                                  # CHANGED: scope token to the installation owner
+          repositories: gold                                   # CHANGED: grant token access to the 'gold' repo (no trailing '-')
+          skip-token-revoke: true                              # CHANGED: keep token valid after this job so next job can use it
 
   checkout-to-gold:
     name: Checkout to gold repo
@@ -25,9 +27,10 @@ jobs:
       - id: checkout
         uses: actions/checkout@v4
         with:
-          repository: Ali-Moatazz/gold-
+          repository: Ali-Moatazz/gold                        # CHANGED: correct repo name (no trailing '-')
           token: ${{ needs.generate-token.outputs.app_token }}
           path: gold
+          persist-credentials: false                          # CHANGED: avoid writing default GITHUB_TOKEN into repo config
 
       - name: Create hello.txt
         run: echo "Hello Ali" > hello.txt
@@ -35,8 +38,8 @@ jobs:
 
       - name: Commit changes
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-app[bot]"     # OPTIONAL: nicer committer for an app; can keep your original
+          git config --global user.email "github-app[bot]@users.noreply.github.com"
           git add hello.txt
           git commit -m "Add hello.txt" || echo "No changes to commit"
         working-directory: gold
@@ -46,7 +49,7 @@ jobs:
         working-directory: gold
         env: 
           GITHUB_TOKEN: ${{ needs.generate-token.outputs.app_token }}
-        
+
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v6
@@ -54,7 +57,7 @@ jobs:
           token: ${{ needs.generate-token.outputs.app_token }}
           path: gold
           branch: my-branch
-          base: main
+          base: master                                        # CHANGED: assignment says PR into master; switch if your default is 'main'
           title: "Add hello.txt"
           body: "This PR adds hello.txt with greeting message."
           
