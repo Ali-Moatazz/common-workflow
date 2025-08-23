@@ -1,63 +1,66 @@
-name: Sync to Gold
+name: My Workflow
 
 on:
   workflow_dispatch:
 
 jobs:
-  sync:
+  generate-token:
+    name: Generate GitHub App token
     runs-on: ubuntu-latest
-
+    outputs: 
+      app_token: ${{ steps.app-token.outputs.token }}
     steps:
-      # 1. Generate installation token from GitHub App
-      - name: Generate GitHub App Token
-        id: app-token
+      - id: app-token
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.PEMCONTENTS }}
-          owner: Ali-Moatazz
+          repository: Ali-Moatazz/gold-
 
-      # 2. Checkout the gold repo with app token
-      - name: Checkout gold repo
+  checkout-to-gold:
+    name: Checkout to gold repo
+    runs-on: ubuntu-latest
+    needs: generate-token
+    steps:
+      - id: checkout
         uses: actions/checkout@v4
         with:
-          repository: Ali-Moatazz/gold
-          token: ${{ steps.app-token.outputs.token }}
+          repository: Ali-Moatazz/gold-
+          token: ${{ needs.generate-token.outputs.app_token }}
           path: gold
 
-      # 3. Make a change (example: update timestamp file)
-      - name: Make change
-        run: |
-          cd gold
-          echo "Updated at $(date)" > sync.txt
+      - name: Create hello.txt
+        run: echo "Hello Ali" > hello.txt
+        working-directory: gold
 
-      # 4. Commit changes
       - name: Commit changes
         run: |
-          cd gold
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -b sync-update-branch
-          git add .
-          git commit -m "Automated sync update" || echo "No changes to commit"
-          git push origin sync-update-branch || echo "No changes pushed"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add hello.txt
+          git commit -m "Add hello.txt" || echo "No changes to commit"
+        working-directory: gold
 
-      # 5. Create Pull Request
+      - name: Push changes to new branch
+        run: git push origin HEAD:my-branch
+        working-directory: gold
+        env: 
+          GITHUB_TOKEN: ${{ needs.generate-token.outputs.app_token }}
+        
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ steps.app-token.outputs.token }}
+          token: ${{ needs.generate-token.outputs.app_token }}
           path: gold
-          branch: sync-update-branch
+          branch: my-branch
           base: main
-          title: "Automated Sync Update"
-          body: "This PR was created automatically by GitHub Actions."
-
-      # 6. Merge PR
+          title: "Add hello.txt"
+          body: "This PR adds hello.txt with greeting message."
+          
       - name: Merge Pull Request
-        if: steps.cpr.outputs.pull-request-number
-        run: |
-          gh pr merge ${{ steps.cpr.outputs.pull-request-number }} --merge --admin --repo Ali-Moatazz/gold
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ needs.generate-token.outputs.app_token }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          merge-method: squash
