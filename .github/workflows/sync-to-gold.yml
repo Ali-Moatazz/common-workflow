@@ -15,6 +15,7 @@ jobs:
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.PEMCONTENTS }}
+          repository: Ali-Moatazz/gold
   checkout-to-gold:
     name: Checkout to gold repo
     runs-on: ubuntu-latest
