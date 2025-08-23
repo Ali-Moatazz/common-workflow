@@ -10,12 +10,12 @@ jobs:
     outputs: 
       app_token: ${{ steps.app-token.outputs.token }}
     steps:
-      - name: Generate token
-        id: generate-token
-        uses: tibdex/github-app-token@v1
+      - id: app-token
+        uses: actions/create-github-app-token@v1
         with:
-         app_id: ${{ secrets.APP_ID }}
-         private_key: ${{ secrets.PEMCONTENTS }}
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.PEMCONTENTS }}
+          repository: Ali-Moatazz/gold
   checkout-to-gold:
     name: Checkout to gold repo
     runs-on: ubuntu-latest
