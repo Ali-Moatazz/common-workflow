@@ -17,16 +17,6 @@ jobs:
           private-key: ${{ secrets.PEMCONTENTS }}
           repository: Ali-Moatazz/gold-
 
-      # ADD THIS STEP TO FORCE FAILURE IF TOKEN IS EMPTY
-      - name: Validate token was generated
-        run: |
-          if [ -z "${{ steps.app-token.outputs.token }}" ]; then
-            echo "❌ ERROR: Token is empty! The previous step failed silently."
-            exit 1
-          else
-            echo "✅ Token generated successfully"
-          fi
-
   checkout-to-gold:
     name: Checkout to gold repo
     runs-on: ubuntu-latest
@@ -54,7 +44,7 @@ jobs:
       - name: Push changes to new branch
         run: git push origin HEAD:my-branch
         working-directory: gold
-        env:
+        env: 
           GITHUB_TOKEN: ${{ needs.generate-token.outputs.app_token }}
         
       - name: Create Pull Request
