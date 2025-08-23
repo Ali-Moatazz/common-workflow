@@ -15,44 +15,29 @@ jobs:
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.PEMCONTENTS }}
-          repository: Ali-Moatazz/gold-
+          repository: Ali-Moatazz/gold-   # ✅ needed for API-scoped token
 
-  checkout-to-gold:
-    name: Checkout to gold repo
+  update-gold-via-api:
+    name: Update gold repo via GitHub API
     runs-on: ubuntu-latest
     needs: generate-token
     steps:
-      - id: checkout
-        uses: actions/checkout@v4
+      - name: Create hello.txt in gold repo
+        uses: devops-infra/action-github-file@v2   # ✅ replaced checkout with API action
         with:
+          github_token: ${{ needs.generate-token.outputs.app_token }}  # ✅ GitHub App token
           repository: Ali-Moatazz/gold-
-          token: ${{ needs.generate-token.outputs.app_token }}
-          path: gold
+          file: hello.txt
+          branch: my-branch
+          content: "Hello Ali"
+          commit_message: "Add hello.txt"
 
-      - name: Create hello.txt
-        run: echo "Hello Ali" > hello.txt
-        working-directory: gold
-
-      - name: Commit changes
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add hello.txt
-          git commit -m "Add hello.txt" || echo "No changes to commit"
-        working-directory: gold
-
-      - name: Push changes to new branch
-        run: git push origin HEAD:my-branch
-        working-directory: gold
-        env: 
-          GITHUB_TOKEN: ${{ needs.generate-token.outputs.app_token }}
-        
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ needs.generate-token.outputs.app_token }}
-          path: gold
+          repository: Ali-Moatazz/gold-   # ✅ must specify repo for App token usage
           branch: my-branch
           base: main
           title: "Add hello.txt"
