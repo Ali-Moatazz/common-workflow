@@ -16,6 +16,7 @@ jobs:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.PEMCONTENTS }}
           repository: Ali-Moatazz/gold-
+
   checkout-to-gold:
     name: Checkout to gold repo
     runs-on: ubuntu-latest
@@ -24,7 +25,7 @@ jobs:
       - id: checkout
         uses: actions/checkout@v4
         with:
-          repository: Ali-Moatazz/gold
+          repository: Ali-Moatazz/gold-
           token: ${{ needs.generate-token.outputs.app_token }}
           path: gold
 
@@ -39,9 +40,12 @@ jobs:
           git add hello.txt
           git commit -m "Add hello.txt" || echo "No changes to commit"
         working-directory: gold
+
       - name: Push changes to new branch
         run: git push origin HEAD:my-branch
         working-directory: gold
+        env: 
+          GITHUB_TOKEN: ${{ needs.generate-token.outputs.app_token }}
         
       - name: Create Pull Request
         id: cpr
