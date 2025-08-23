@@ -8,26 +8,45 @@ jobs:
     name: Generate GitHub App token
     runs-on: ubuntu-latest
     outputs: 
-      app_token: ${{ steps.app-token.outputs.token }}
+      app_token: ${{ steps.generate-token.outputs.token }}
     steps:
-      - id: app-token
-        uses: actions/create-github-app-token@v1
+      - name: Generate token
+        id: generate-token
+        uses: tibdex/github-app-token@v1
         with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.PEMCONTENTS }}
-          repository: Ali-Moatazz/gold
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.PEMCONTENTS }}
+
+      # DEBUGGING: This will only run if the previous step succeeded.
+      - name: Debug - Show Token Prefix
+        run: |
+          echo "Token output from step: ${{ steps.generate-token.outputs.token }}"
+          # This creates a short, secure hash of the token to prove it exists without exposing it.
+          TOKEN_HASH=$(echo "${{ steps.generate-token.outputs.token }}" | sha256sum | head -c 10)
+          echo "Token generated successfully. Hash prefix: $TOKEN_HASH"
+        if: success()
+
   checkout-to-gold:
     name: Checkout to gold repo
     runs-on: ubuntu-latest
     needs: generate-token
+    # PREVENT THIS JOB FROM RUNNING IF THE TOKEN JOB FAILED
+    if: success() && needs.generate-token.outputs.app_token != ''
     steps:
-      - id: checkout
+      - name: Debug - Show Job Token
+        run: |
+          echo "Value of app_token from previous job: ${{ needs.generate-token.outputs.app_token }}"
+          # This will show the first few chars for verification (will be masked as *** by GitHub)
+          echo "Token for checkout: ${{ needs.generate-token.outputs.app_token }}"
+        
+      - name: Checkout gold repo
         uses: actions/checkout@v4
         with:
           repository: Ali-Moatazz/gold
           token: ${{ needs.generate-token.outputs.app_token }}
           path: gold
 
+      # ... rest of your steps remain the same ...
       - name: Create hello.txt
         run: echo "Hello Ali" > hello.txt
         working-directory: gold
@@ -39,9 +58,12 @@ jobs:
           git add hello.txt
           git commit -m "Add hello.txt" || echo "No changes to commit"
         working-directory: gold
+        
       - name: Push changes to new branch
         run: git push origin HEAD:my-branch
         working-directory: gold
+        env:
+          GITHUB_TOKEN: ${{ needs.generate-token.outputs.app_token }}
         
       - name: Create Pull Request
         id: cpr
