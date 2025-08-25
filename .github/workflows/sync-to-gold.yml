@@ -19,7 +19,7 @@ jobs:
 
       - name: set output
         run: |
-          echo "app-token=${{ steps.app-token.outputs.token }} >> $GITHUB_OUTPUT"
+          echo "app-token=${{ steps.app-token.outputs.token }} >>" $GITHUB_OUTPUT
           
 
   checkout-to-gold:
@@ -54,13 +54,13 @@ jobs:
         run: git push origin HEAD:my-branch
         working-directory: gold
         env: 
-          GITHUB_TOKEN: ${{ needs.generate-token.outputs.app_token }}
+          GITHUB_TOKEN: ${{ needs.generate-token.outputs.app-token }}
         
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ needs.generate-token.outputs.app_token }}
+          token: ${{ needs.generate-token.outputs.app-token }}
           path: gold
           branch: my-branch
           base: main
@@ -70,6 +70,6 @@ jobs:
       - name: Merge Pull Request
         uses: peter-evans/enable-pull-request-automerge@v3
         with:
-          token: ${{ needs.generate-token.outputs.app_token }}
+          token: ${{ needs.generate-token.outputs.app-token }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
           merge-method: squash
