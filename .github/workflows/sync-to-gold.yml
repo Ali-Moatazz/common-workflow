@@ -15,6 +15,10 @@ jobs:
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.PEMCONTENTS }}
+
+      - name: print app id
+        run: |
+          echo "${{ secrets.APP_ID }}"
           
 
       - name: set output
