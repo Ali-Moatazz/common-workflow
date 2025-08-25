@@ -27,7 +27,14 @@ jobs:
     name: Checkout to gold repo
     runs-on: ubuntu-latest
     needs: generate-token
+    env:
+      APP_TOKEN: ${{ needs.generate-token.outputs.app_token }}
+      
     steps:
+      - name: print variables
+        run: |
+          echo "${{ env.APP_TOKEN }}"
+          
       - id: checkout
         uses: actions/checkout@v4
         with:
