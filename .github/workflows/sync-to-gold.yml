@@ -15,7 +15,7 @@ jobs:
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.PEMCONTENTS }}
-          repository: Ali-Moatazz/gold-
+          
 
       - name: set output
         run: |
@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: generate-token
     env:
-      APP_TOKEN: ${{ needs.generate-token.outputs.app_token }}
+      APP_TOKEN: ${{needs.generate-token.outputs.app_token}}
       
     steps:
       - name: print variables
