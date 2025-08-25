@@ -7,6 +7,9 @@ jobs:
   generate-token:
     name: Generate GitHub App token
     runs-on: ubuntu-latest
+    env:
+       APP_ID: ${{ secrets.APP_ID }} 
+      
     outputs: 
       app-token: ${{ steps.app-token.outputs.token }}
     steps:
@@ -18,7 +21,9 @@ jobs:
 
       - name: print app id
         run: |
-          echo "${{ secrets.APP_ID }}"
+          echo -n "$APP_ID" | xxd -ps
+
+         
           
 
       - name: set output
