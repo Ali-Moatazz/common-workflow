@@ -19,7 +19,7 @@ jobs:
 
       - name: set output
         run: |
-          echo "app-token=${{ steps.app-token.outputs.token }} >>" $GITHUB_OUTPUT
+          echo "app-token=${{ steps.app-token.outputs.token }}" >> $GITHUB_OUTPUT
           
 
   checkout-to-gold:
