@@ -28,7 +28,9 @@ jobs:
     needs: generate-token
       
     steps:
-          
+      - name: print variabble
+        run: |
+          echo "Using token: ${{ needs.generate-token.outputs.app-token }}"
       - id: checkout
         uses: actions/checkout@v4
         with:
