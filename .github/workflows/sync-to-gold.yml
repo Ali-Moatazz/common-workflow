@@ -31,7 +31,7 @@ jobs:
     steps:
       - name: print variables
         run: |
-          echo "${{ env.APP_TOKEN }}"
+          echo "token is: ${{needs.generate-token.outputs.app_token}}"
           
       - id: checkout
         uses: actions/checkout@v4
