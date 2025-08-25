@@ -17,6 +17,12 @@ jobs:
           private-key: ${{ secrets.PEMCONTENTS }}
           repository: Ali-Moatazz/gold-
 
+      - name: set output
+        run: |
+          
+          echo "app_token=${{ steps.app-token.outputs.token }} >> $GITHUB_OUTPUT"
+          echo "$app_token"
+
   checkout-to-gold:
     name: Checkout to gold repo
     runs-on: ubuntu-latest
