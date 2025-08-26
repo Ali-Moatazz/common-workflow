@@ -1,4 +1,4 @@
-name: Debug Workflow
+name: PR Automation
 
 on:
   workflow_dispatch:
@@ -7,19 +7,38 @@ jobs:
   generate-token:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "✅ Running generate-token job"
-        id: hello
-      - run: echo "fake-token-123" > token.txt
-      - id: set-output
-        run: echo "token=fake-token-123" >> $GITHUB_OUTPUT
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PEM }}
+          owner: Ali-Moatazz
+          repositories: gold
+
+      - name: Debug token length
+        run: |
+          echo "==== DEBUG generate-token ===="
+          echo "Token: '${{ steps.app-token.outputs.token }}'"
+          echo "Token length: $(echo -n '${{ steps.app-token.outputs.token }}' | wc -c)"
+          echo "================================"
+
     outputs:
-      app_token: ${{ steps.set-output.outputs.token }}
+      app_token: ${{ steps.app-token.outputs.token }}
 
   checkout-to-gold:
     needs: generate-token
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          echo "==== DEBUG ===="
+      - name: Debug needs output
+        run: |
+          echo "==== DEBUG checkout-to-gold ===="
           echo "Token from needs: '${{ needs.generate-token.outputs.app_token }}'"
-          echo "================"
+          echo "Token length: $(echo -n '${{ needs.generate-token.outputs.app_token }}' | wc -c)"
+          echo "================================"
+
+      - name: Checkout gold repo
+        uses: actions/checkout@v4
+        with:
+          repository: Ali-Moatazz/gold
+          token: ${{ needs.generate-token.outputs.app_token }}
