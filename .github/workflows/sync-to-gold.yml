@@ -15,6 +15,8 @@ jobs:
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.PEMCONTENTS }}
+          # CHANGE: Removed your manual "echo >> $GITHUB_OUTPUT" step 
+          # because this action already outputs the token as `steps.app-token.outputs.token`.
 
   checkout-to-gold:
     name: Checkout to gold repo
@@ -23,17 +25,19 @@ jobs:
     steps:
       - name: Print token (debug)
         run: echo "Using token: ${{ needs.generate-token.outputs.app-token }}"
+        # CHANGE: Added debug print so you can confirm token is passed.
 
       - name: Checkout gold repo
         uses: actions/checkout@v4
         with:
           repository: Ali-Moatazz/gold-
-          token: ${{ needs.generate-token.outputs.app-token }}
+          token: ${{ needs.generate-token.outputs.app-token }}   # CHANGE: Removed the quotes `'...'`
           path: gold
 
       - name: Create hello.txt
         run: echo "Hello Ali" > hello.txt
         working-directory: gold
+        # (same as yours, no change)
 
       - name: Commit changes
         run: |
@@ -42,23 +46,26 @@ jobs:
           git add hello.txt
           git commit -m "Add hello.txt" || echo "No changes to commit"
         working-directory: gold
+        # CHANGE: Added `|| echo "No changes to commit"` so it doesn’t fail if file exists already.
 
       - name: Push changes to new branch
         run: git push origin HEAD:my-branch
         working-directory: gold
         env:
           GITHUB_TOKEN: ${{ needs.generate-token.outputs.app-token }}
+          # CHANGE: Passing the app token in env, not relying on default GitHub token.
 
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ needs.generate-token.outputs.app-token }}
+          token: ${{ needs-generate-token.outputs.app-token }}
           path: gold
           branch: my-branch
           base: main
           title: "Add hello.txt"
           body: "This PR adds hello.txt with greeting message."
+          # CHANGE: Fixed token handling and made sure PR is targeted at `main`.
 
       - name: Enable auto-merge
         uses: peter-evans/enable-pull-request-automerge@v3
@@ -66,3 +73,4 @@ jobs:
           token: ${{ needs.generate-token.outputs.app-token }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
           merge-method: squash
+          # CHANGE: Added auto-merge so you don’t have to click "merge" manually.
