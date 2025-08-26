@@ -1,4 +1,4 @@
-name: My Workflow
+name: Debug App Token
 
 on:
   workflow_dispatch:
@@ -7,79 +7,39 @@ jobs:
   generate-token:
     name: Generate GitHub App token
     runs-on: ubuntu-latest
-
     outputs:
-      app-token: ${{ steps.get-token.outputs.token }}
-
+      app_token: ${{ steps.app-token.outputs.token }}
     steps:
-      - name: Debug App ID + PEM length
+      - name: Debug inputs
         run: |
-          echo "==== DEBUG: INPUTS TO ACTION ===="
-          if [ -z "${APP_ID}" ]; then
-            echo "❌ APP_ID is empty!"
-          else
-            echo "✅ APP_ID = ${APP_ID}"
-          fi
+          echo "APP_ID = ${{ secrets.APP_ID }}"
+          echo "PEM length = $(echo "${{ secrets.PEMCONTENTS }}" | wc -c)"
 
-          if [ -z "${PEM}" ]; then
-            echo "❌ PEMCONTENTS is empty!"
-          else
-            echo "✅ PEMCONTENTS is NOT empty"
-            echo "Length: ${#PEM}"
-            echo "First 50 chars: ${PEM:0:50}"
-            echo "Last 50 chars: ${PEM: -50}"
-          fi
-          echo "=================================="
-        env:
-          APP_ID: ${{ secrets.APP_ID }}
-          PEM: ${{ secrets.PEMCONTENTS }}
-
-      - id: get-token
+      - id: app-token
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.PEMCONTENTS }}
 
-      - name: Debug token after action
+      - name: Debug token length
         run: |
-          echo "==== DEBUG: APP TOKEN ===="
-          if [ -z "${TOKEN}" ]; then
-            echo "❌ TOKEN is empty!"
-          else
-            echo "✅ TOKEN is NOT empty"
-            echo "Length of token: ${#TOKEN}"
-            echo "First 50 chars: ${TOKEN:0:50}"
-            echo "Last 50 chars: ${TOKEN: -50}"
-          fi
-          echo "=========================="
-        env:
-          TOKEN: ${{ steps.get-token.outputs.token }}
-
+          echo "Generated token length = ${{ steps.app-token.outputs.token }}" | wc -c
 
   checkout-to-gold:
-    name: Checkout to gold repo
-    runs-on: ubuntu-latest
     needs: generate-token
-
+    runs-on: ubuntu-latest
     steps:
-      - name: Debug token from previous job
-        run: |
+      - run: |
           echo "==== DEBUG: NEEDS TOKEN ===="
-          if [ -z "${TOKEN}" ]; then
+          if [ -z "${{ needs.generate-token.outputs.app_token }}" ]; then
             echo "❌ TOKEN from needs is empty!"
           else
-            echo "✅ TOKEN from needs is NOT empty"
-            echo "Length of token: ${#TOKEN}"
-            echo "First 50 chars: ${TOKEN:0:50}"
-            echo "Last 50 chars: ${TOKEN: -50}"
+            echo "✅ TOKEN length: $(echo '${{ needs.generate-token.outputs.app_token }}' | wc -c)"
           fi
           echo "============================="
-        env:
-          TOKEN: ${{ needs.generate-token.outputs.app-token }}
 
-      - name: Checkout gold repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           repository: Ali-Moatazz/gold
-          token: ${{ needs.generate-token.outputs.app-token }}
           path: gold
+          token: ${{ needs.generate-token.outputs.app_token }}
