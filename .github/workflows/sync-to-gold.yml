@@ -1,4 +1,4 @@
-name: Auto PR to gold repo
+name: My Workflow
 
 on:
   workflow_dispatch:
@@ -7,57 +7,78 @@ jobs:
   generate-token:
     name: Generate GitHub App token
     runs-on: ubuntu-latest
-    outputs:
-      app_token: ${{ steps.generate.outputs.token }}
+    env:
+       APP_ID: ${{ secrets.APP_ID }} 
+      
+    outputs: 
+      app-token: ${{ steps.app-token.outputs.token }}
     steps:
-      - name: Generate token
-        id: generate
+      - id: app-token
         uses: actions/create-github-app-token@v1
         with:
-          app-id: ${{ secrets.app-id }}
+          app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.PEMCONTENTS }}
 
-  create-pr:
-    name: Create & Merge PR in gold repo
+      - name: print app id
+        run: |
+          echo -n "$APP_ID" | xxd -ps
+
+         
+          
+
+      - name: set output
+        run: |
+          echo "app-token=${{ steps.app-token.outputs.token }}" >> $GITHUB_OUTPUT
+          
+
+  checkout-to-gold:
+    name: Checkout to gold repo
     runs-on: ubuntu-latest
     needs: generate-token
+      
     steps:
-      - name: Checkout gold repo
+      - name: print variabble
+        run: |
+          echo "Using token: ${{ needs.generate-token.outputs.app-token }}"
+      - id: checkout
         uses: actions/checkout@v4
         with:
           repository: Ali-Moatazz/gold-
-          token: ${{ needs.generate-token.outputs.app_token }}
+          token: '${{ needs.generate-token.outputs.app-token }}'
+          path: gold
 
-      - name: Set Git user
+      - name: Create hello.txt
+        run: echo "Hello Ali" > hello.txt
+        working-directory: gold
+
+      - name: Commit changes
         run: |
-          git config user.name "Ali-Moatazz[bot]"
-          git config user.email "Ali-Moatazz[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add hello.txt
+          git commit -m "Add hello.txt" || echo "No changes to commit"
+        working-directory: gold
 
-      - name: Create new branch and commit change
-        run: |
-          BRANCH="auto-pr-$(date +%s)"
-          git checkout -b $BRANCH
-          echo "Automated PR at $(date)" >> backup.txt
-          git add backup.txt
-          git commit -m "Automated PR test"
-          git push origin $BRANCH
-          echo "branch_name=$BRANCH" >> $GITHUB_ENV
-
+      - name: Push changes to new branch
+        run: git push origin HEAD:my-branch
+        working-directory: gold
+        env: 
+          GITHUB_TOKEN: ${{ needs.generate-token.outputs.app-token }}
+        
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ needs.generate-token.outputs.app_token }}
-          branch: ${{ env.branch_name }}
-          title: "Automated PR from common-workflows"
-          body: "This PR was created automatically using GitHub Actions."
+          token: ${{ needs.generate-token.outputs.app-token }}
+          path: gold
+          branch: my-branch
           base: main
-
+          title: "Add hello.txt"
+          body: "This PR adds hello.txt with greeting message."
+          
       - name: Merge Pull Request
-        if: steps.cpr.outputs.pull-request-number != ''
-        uses: peter-evans/enable-pull-request-merge@v3
+        uses: peter-evans/enable-pull-request-automerge@v3
         with:
-          token: ${{ needs.generate-token.outputs.app_token }}
-          repository: Ali-Moatazz/gold-
+          token: ${{ needs.generate-token.outputs.app-token }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
           merge-method: squash
