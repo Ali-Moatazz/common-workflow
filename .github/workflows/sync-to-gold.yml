@@ -44,7 +44,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Ali-Moatazz/gold-
-          token: ${{ needs.generate-token.outputs.app-token }}
+          token: '${{ needs.generate-token.outputs.app-token }}'
           path: gold
 
       - name: Create hello.txt
