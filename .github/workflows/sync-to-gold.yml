@@ -1,84 +1,34 @@
-name: My Workflow
+name: Debug Token Generation
 
 on:
   workflow_dispatch:
 
 jobs:
-  generate-token:
-    name: Generate GitHub App token
+  debug-token:
+    name: Debug GitHub App Token
     runs-on: ubuntu-latest
-    outputs: 
-      # FIX: Use consistent naming with underscore
-      app_token: ${{ steps.app-token.outputs.token }}
     steps:
-      - id: app-token
+      - name: Check Secrets Exist
+        run: |
+          echo "APP_ID exists: ${{ secrets.APP_ID != '' }}"
+          echo "PEMCONTENTS exists: ${{ secrets.PEMCONTENTS != '' }}"
+          echo "APP_ID length: ${{ length(secrets.APP_ID) }}"
+          echo "PEMCONTENTS starts with: ${{ secrets.PEMCONTENTS != '' && secrets.PEMCONTENTS[:30] }}..."
+          
+      - name: Try Token Generation
+        id: app-token
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.PEMCONTENTS }}
-          # ADD: Specify the repository to ensure correct installation token
           repository: Ali-Moatazz/gold-
 
-      - name: Debug - Check Token Generation
+      - name: Success Message
+        if: success()
+        run: echo "✅ Token generated successfully!"
+        
+      - name: Show Token Info
+        if: success()
         run: |
-          # Debug: Check if token was generated (will be masked in logs)
           echo "Token generated: ${{ steps.app-token.outputs.token != '' }}"
           echo "Token length: ${#{{ steps.app-token.outputs.token }}}"
-
-  checkout-to-gold:
-    name: Checkout to gold repo
-    runs-on: ubuntu-latest
-    needs: generate-token
-    # ADD: Safety check to prevent job from running if token is empty
-    if: ${{ success() && needs.generate-token.outputs.app_token != '' }}
-    steps:
-      - name: Debug - Print Token Status
-        run: |
-          echo "Token received from previous job: ${{ needs.generate-token.outputs.app_token != '' }}"
-          
-      - name: Checkout gold repository
-        uses: actions/checkout@v4
-        with:
-          repository: Ali-Moatazz/gold-
-          # FIX: Remove quotes around the token reference
-          token: ${{ needs.generate-token.outputs.app_token }}
-          path: gold
-
-      - name: Create hello.txt
-        run: echo "Hello Ali" > hello.txt
-        working-directory: gold
-
-      - name: Commit changes
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add hello.txt
-          git commit -m "Add hello.txt" || echo "No changes to commit"
-        working-directory: gold
-
-      - name: Push changes to new branch
-        run: git push origin HEAD:my-branch
-        working-directory: gold
-        env: 
-          # FIX: Use consistent variable name with underscore
-          GITHUB_TOKEN: ${{ needs.generate-token.outputs.app_token }}
-        
-      - name: Create Pull Request
-        id: cpr
-        uses: peter-evans/create-pull-request@v6
-        with:
-          # FIX: Use consistent variable name with underscore
-          token: ${{ needs.generate-token.outputs.app_token }}
-          path: gold
-          branch: my-branch
-          base: main
-          title: "Add hello.txt"
-          body: "This PR adds hello.txt with greeting message."
-          
-      - name: Merge Pull Request
-        uses: peter-evans/enable-pull-request-automerge@v3
-        with:
-          # FIX: Use consistent variable name with underscore
-          token: ${{ needs.generate-token.outputs.app_token }}
-          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
-          merge-method: squash
