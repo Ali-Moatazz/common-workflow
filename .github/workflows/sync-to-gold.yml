@@ -1,4 +1,4 @@
-name: Sync to gold repo
+name: My Workflow
 
 on:
   workflow_dispatch:
@@ -7,7 +7,10 @@ jobs:
   generate-token:
     name: Generate GitHub App token
     runs-on: ubuntu-latest
-    outputs:
+    env:
+       APP_ID: ${{ secrets.APP_ID }} 
+      
+    outputs: 
       app-token: ${{ steps.app-token.outputs.token }}
     steps:
       - id: app-token
@@ -15,29 +18,38 @@ jobs:
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.PEMCONTENTS }}
-          # CHANGE: Removed your manual "echo >> $GITHUB_OUTPUT" step 
-          # because this action already outputs the token as `steps.app-token.outputs.token`.
+
+      - name: print app id
+        run: |
+          echo -n "$APP_ID" | xxd -ps
+
+         
+          
+
+      - name: set output
+        run: |
+          echo "app-token=${{ steps.app-token.outputs.token }}" >> $GITHUB_OUTPUT
+          
 
   checkout-to-gold:
     name: Checkout to gold repo
     runs-on: ubuntu-latest
     needs: generate-token
+      
     steps:
-      - name: Print token (debug)
-        run: echo "Using token: ${{ needs.generate-token.outputs.app-token }}"
-        # CHANGE: Added debug print so you can confirm token is passed.
-
-      - name: Checkout gold repo
+      - name: print variabble
+        run: |
+          echo "Using token: ${{ needs.generate-token.outputs.app-token }}"
+      - id: checkout
         uses: actions/checkout@v4
         with:
           repository: Ali-Moatazz/gold-
-          token: ${{ needs.generate-token.outputs.app-token }}   # CHANGE: Removed the quotes `'...'`
+          token: '${{ needs.generate-token.outputs.app-token }}'
           path: gold
 
       - name: Create hello.txt
         run: echo "Hello Ali" > hello.txt
         working-directory: gold
-        # (same as yours, no change)
 
       - name: Commit changes
         run: |
@@ -46,31 +58,27 @@ jobs:
           git add hello.txt
           git commit -m "Add hello.txt" || echo "No changes to commit"
         working-directory: gold
-        # CHANGE: Added `|| echo "No changes to commit"` so it doesn’t fail if file exists already.
 
       - name: Push changes to new branch
         run: git push origin HEAD:my-branch
         working-directory: gold
-        env:
+        env: 
           GITHUB_TOKEN: ${{ needs.generate-token.outputs.app-token }}
-          # CHANGE: Passing the app token in env, not relying on default GitHub token.
-
+        
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ needs-generate-token.outputs.app-token }}
+          token: ${{ needs.generate-token.outputs.app-token }}
           path: gold
           branch: my-branch
           base: main
           title: "Add hello.txt"
           body: "This PR adds hello.txt with greeting message."
-          # CHANGE: Fixed token handling and made sure PR is targeted at `main`.
-
-      - name: Enable auto-merge
+          
+      - name: Merge Pull Request
         uses: peter-evans/enable-pull-request-automerge@v3
         with:
           token: ${{ needs.generate-token.outputs.app-token }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
           merge-method: squash
-          # CHANGE: Added auto-merge so you don’t have to click "merge" manually.
