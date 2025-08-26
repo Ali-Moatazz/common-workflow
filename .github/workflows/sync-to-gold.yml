@@ -11,9 +11,9 @@ jobs:
        APP_ID: ${{ secrets.APP_ID }} 
       
     outputs: 
-      app-token: ${{ steps.app-token.outputs.token }}
+      app-token: ${{ steps.generate.outputs.token }}
     steps:
-      - id: app-token
+      - id: generate
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ secrets.APP_ID }}
