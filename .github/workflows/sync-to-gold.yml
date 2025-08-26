@@ -12,13 +12,35 @@ jobs:
       app-token: ${{ steps.get-token.outputs.token }}
 
     steps:
+      - name: Debug App ID + PEM length
+        run: |
+          echo "==== DEBUG: INPUTS TO ACTION ===="
+          if [ -z "${APP_ID}" ]; then
+            echo "❌ APP_ID is empty!"
+          else
+            echo "✅ APP_ID = ${APP_ID}"
+          fi
+
+          if [ -z "${PEM}" ]; then
+            echo "❌ PEMCONTENTS is empty!"
+          else
+            echo "✅ PEMCONTENTS is NOT empty"
+            echo "Length: ${#PEM}"
+            echo "First 50 chars: ${PEM:0:50}"
+            echo "Last 50 chars: ${PEM: -50}"
+          fi
+          echo "=================================="
+        env:
+          APP_ID: ${{ secrets.APP_ID }}
+          PEM: ${{ secrets.PEMCONTENTS }}
+
       - id: get-token
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.PEMCONTENTS }}
 
-      - name: Debug token info
+      - name: Debug token after action
         run: |
           echo "==== DEBUG: APP TOKEN ===="
           if [ -z "${TOKEN}" ]; then
