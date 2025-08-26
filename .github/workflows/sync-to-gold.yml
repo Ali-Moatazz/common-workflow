@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      app-token: ${{ steps.app-token.outputs.token }}
+      app-token: ${{ steps.get-token.outputs.token }}
 
     steps:
-      - id: app-token
+      - id: get-token
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ secrets.APP_ID }}
@@ -31,7 +31,7 @@ jobs:
           fi
           echo "=========================="
         env:
-          TOKEN: ${{ steps.app-token.outputs.token }}
+          TOKEN: ${{ steps.get-token.outputs.token }}
 
 
   checkout-to-gold:
