@@ -43,7 +43,6 @@ jobs:
           git config --global credential.helper store
           git config --global user.name "mynameisaly[bot]"
           git config --global user.email "mynameisaly[bot]@users.noreply.github.com"
-
       - name: Commit changes
         run: |
           cd gold
@@ -68,25 +67,19 @@ jobs:
         run: |
           echo "${{ steps.generate-token.outputs.token }}" | gh auth login --with-token
           
-      - name: Create Pull Request
+      - name: Create Pull Request manually
+        id: create-pr
         run: |
           cd gold
-          gh pr create \
+          pr_url=$(gh pr create \
             --base main \
             --head aly \
-            --title "Sync changes from workflow" \
-            --body "Automated PR from workflow."
-          
-          # Get latest PR number for head branch aly
-          pr_number=$(gh pr list --head aly --base main --limit 1 --state open --json number --jq '.[0].number')
+            --title "Add hello.txt" \
+            --body "This PR adds hello.txt with greeting message.")
+          pr_number=$(basename "$pr_url")
           echo "PR_NUMBER=$pr_number" >> $GITHUB_ENV
-          echo "Created PR #$pr_number"
-
+            
       - name: Enable auto-merge
         run: |
+          cd gold
           gh pr merge $PR_NUMBER --squash --auto
-
-
-
-      
-            
