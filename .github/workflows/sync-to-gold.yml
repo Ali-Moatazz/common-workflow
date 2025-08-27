@@ -42,7 +42,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
-            "git push origin aly"
+            git push origin aly
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v6
