@@ -33,6 +33,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b aly
           git add hello.txt
           git commit -m "Add hello.txt" || echo "No changes to commit"
         working-directory: gold
