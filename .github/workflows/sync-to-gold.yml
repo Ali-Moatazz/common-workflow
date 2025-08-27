@@ -28,7 +28,6 @@ jobs:
         run: |
           touch hello.txt
           echo "Hello Ali" > hello.txt
-        working-directory: gold
 
       - name: Commit changes
         run: |
