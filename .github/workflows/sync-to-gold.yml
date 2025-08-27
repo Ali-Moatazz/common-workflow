@@ -42,7 +42,6 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ steps.generate-token.outputs.token }}
-          path: gold
           branch: aly
           base: main
           title: "Add hello.txt"
@@ -50,7 +49,6 @@ jobs:
 
         
       - name: Push changes to new branch
-        working-directory: gold
         env:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
