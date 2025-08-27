@@ -38,11 +38,14 @@ jobs:
           git checkout -b aly
           git add hello.txt
           git commit -m "Add hello.txt"
+          
       - name: Push changes to new branch
         env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+          GH_APP_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
-            git push origin aly
+          git push https://x-access-token:${GH_APP_TOKEN}@github.com/Ali-Moatazz/common-workflow-.git aly
+
+            
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v6
