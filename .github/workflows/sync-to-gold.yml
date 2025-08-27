@@ -76,3 +76,6 @@ jobs:
             --head aly \
             --title "Add hello.txt" \
             --body "This PR adds hello.txt with greeting message."
+      - name: Enable Auto-Merge with squash
+        run: |
+          gh pr merge $PR_NUMBER --squash --auto
