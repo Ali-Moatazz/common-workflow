@@ -77,7 +77,7 @@ jobs:
             --title "Add hello.txt" \
             --body "This PR adds hello.txt with greeting message."
             
-          - name: Enable auto-merge
-           run: gh pr merge --auto --delete-branch --squash "$PR_NUMBER" # Replace $PR_NUMBER with the actual PR number or a variable
-           env:
-             GH_APP_TOKEN: ${{ steps.generate-token.outputs.token }}
+      - name: Enable auto-merge
+        run: gh pr merge --auto --delete-branch --squash "$PR_NUMBER" # Replace $PR_NUMBER with the actual PR number or a variable
+        env:
+            GH_APP_TOKEN: ${{ steps.generate-token.outputs.token }}
