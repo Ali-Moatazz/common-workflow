@@ -15,13 +15,19 @@ jobs:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.PEMCONTENTS }}
 
+      - name: Test token access to repo
+        run: |
+          curl -i -H "Authorization: Bearer ${{ steps.generate-token.outputs.token }}" \
+               -H "Accept: application/vnd.github+json" \
+               https://api.github.com/repos/Ali-Moatazz/gold-
+
       - name: Checkout gold- repo
         uses: actions/checkout@v4
         with:
           repository: Ali-Moatazz/gold-
           token: ${{ steps.generate-token.outputs.token }}
           path: gold
-          
+          persist-credentials: false
 
       - name: Create hello.txt
         run: echo "Hello Ali" > hello.txt
@@ -36,7 +42,7 @@ jobs:
         working-directory: gold
 
       - name: Push changes to new branch
-        run: git push origin HEAD:my-branch
+        run: timeout 30s git push --verbose origin HEAD:my-branch
         working-directory: gold
         env:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
