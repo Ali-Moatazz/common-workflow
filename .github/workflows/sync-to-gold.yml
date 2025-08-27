@@ -69,21 +69,23 @@ jobs:
           echo "${{ steps.generate-token.outputs.token }}" | gh auth login --with-token
           
       - name: Create Pull Request manually
+        id: create-pr
         run: |
           cd gold
-          gh pr create \
+          pr_url=$(gh pr create \
             --base main \
             --head aly \
             --title "Add hello.txt" \
-            --body "This PR adds hello.txt with greeting message."
+            --body "This PR adds hello.txt with greeting message.")
+          pr_number=$(basename "$pr_url")
+          echo "PR_NUMBER=$pr_number" >> $GITHUB_ENV
+
 
             
-      - name: Merge Pull Request
-        uses: peter-evans/enable-pull-request-automerge@v3
-        with:
-          token: ${{ needs.generate-token.outputs.app-token }}
-          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
-          merge-method: squash
+      - name: Enable auto-merge
+        run: |
+          cd gold
+          gh pr merge $PR_NUMBER --squash --auto
 
       
             
