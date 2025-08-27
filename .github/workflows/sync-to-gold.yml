@@ -40,14 +40,18 @@ jobs:
 
       - name: Create Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ steps.generate-token.outputs.token }}
-          path: gold
-          branch: aly
-          base: main
-          title: "Add hello.txt"
-          body: "This PR adds hello.txt with greeting message."
+        run: |
+          "gh pr create --base main --head aly"
+        # uses: peter-evans/create-pull-request@v6
+        # with:
+        #   token: ${{ steps.generate-token.outputs.token }}
+        #   path: gold
+        #   branch: aly
+        #   base: main
+        #   title: "Add hello.txt"
+        #   body: "This PR adds hello.txt with greeting message."
+
+        
       - name: Push changes to new branch
         working-directory: gold
         env:
