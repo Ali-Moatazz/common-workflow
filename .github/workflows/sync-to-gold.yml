@@ -69,21 +69,23 @@ jobs:
           echo "${{ steps.generate-token.outputs.token }}" | gh auth login --with-token
           
       - name: Create Pull Request
-        id: create-pr
         run: |
           cd gold
-          pr_url=$(gh pr create \
+          gh pr create \
             --base main \
             --head aly \
             --title "Sync changes from workflow" \
-            --body "Automated PR from workflow." \
-            --json number --jq '.number')
-          echo "PR_NUMBER=$pr_url" >> $GITHUB_ENV
-          echo "Created PR #$pr_url"
+            --body "Automated PR from workflow."
+          
+          # Get latest PR number for head branch aly
+          pr_number=$(gh pr list --head aly --base main --limit 1 --state open --json number --jq '.[0].number')
+          echo "PR_NUMBER=$pr_number" >> $GITHUB_ENV
+          echo "Created PR #$pr_number"
 
       - name: Enable auto-merge
         run: |
           gh pr merge $PR_NUMBER --squash --auto
+
 
 
       
