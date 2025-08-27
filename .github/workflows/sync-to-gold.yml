@@ -25,7 +25,9 @@ jobs:
         #   path: gold
           
       - name: Create hello.txt
-        run: echo "Hello Ali" > hello.txt
+        run: |
+          touch hello.txt
+          echo "Hello Ali" > hello.txt
         working-directory: gold
 
       - name: Commit changes
