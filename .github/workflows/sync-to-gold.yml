@@ -21,7 +21,7 @@ jobs:
           repository: Ali-Moatazz/gold-
           token: ${{ steps.generate-token.outputs.token }}
           path: gold
-          persist-credentials: false
+          
 
       - name: Create hello.txt
         run: echo "Hello Ali" > hello.txt
