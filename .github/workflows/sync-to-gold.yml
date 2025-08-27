@@ -69,17 +69,22 @@ jobs:
           echo "${{ steps.generate-token.outputs.token }}" | gh auth login --with-token
           
       - name: Create Pull Request manually
+        id: create-pr
         run: |
           cd gold
-          gh pr create \
+          pr_number=$(gh pr create \
             --base main \
             --head aly \
             --title "Add hello.txt" \
-            --body "This PR adds hello.txt with greeting message."
-              echo "PR_NUMBER=$pr_number" >> $GITHUB_ENV
+            --body "This PR adds hello.txt with greeting message." \
+            --json number --jq '.number')
+          echo "PR_NUMBER=$pr_number" >> $GITHUB_ENV
+
             
       - name: Enable auto-merge
         run: |
+          cd gold
           gh pr merge $PR_NUMBER --squash --auto
+
       
             
