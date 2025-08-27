@@ -16,8 +16,6 @@ jobs:
           private-key: ${{ secrets.PEMCONTENTS }}
           owner: ${{ github.repository_owner }}
 
-      
-
       - name: Checkout gold- repo
         uses: actions/checkout@v4
         with:
@@ -41,12 +39,11 @@ jobs:
           
       - name: Configure Git credentials
         run: |
-            echo "https://x-access-token:${{ steps.generate-token.outputs.token }}@github.com" > ~/.git-credentials
-            git config --global credential.helper store
-            git config --global user.name "mynameisaly[bot]"
-            git config --global user.email "mynameisaly[bot]@users.noreply.github.com"
-            # git config user.name "github-actions[bot]"
-            # git config user.email "github-actions[bot]@users.noreply.github.com"
+          echo "https://x-access-token:${{ steps.generate-token.outputs.token }}@github.com" > ~/.git-credentials
+          git config --global credential.helper store
+          git config --global user.name "mynameisaly[bot]"
+          git config --global user.email "mynameisaly[bot]@users.noreply.github.com"
+
       - name: Commit changes
         run: |
           cd gold
@@ -59,29 +56,23 @@ jobs:
         env:
           GH_APP_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
-          # git push --set-upstream origin aly
           cd gold
           git push https://x-access-token:${GH_APP_TOKEN}@github.com/Ali-Moatazz/gold.git aly
-            
-      - name: Create Pull Request
-        id: cpr
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ steps.generate-token.outputs.token }}
-          branch: aly
-          base: main
-          path: gold
-          title: "Add hello.txt"
-          body: "This PR adds hello.txt with greeting message."
-
-      
-  
-
-
-
-      - name: Enable Auto-Merge
-        uses: peter-evans/enable-pull-request-automerge@v3
-        with:
-          token: ${{ steps.generate-token.outputs.token }}
-          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
-          merge-method: squash
+          
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gh
+          
+      - name: Authenticate GitHub CLI
+        run: |
+          echo "${{ steps.generate-token.outputs.token }}" | gh auth login --with-token
+          
+      - name: Create Pull Request manually
+        run: |
+          cd gold
+          gh pr create \
+            --base main \
+            --head aly \
+            --title "Add hello.txt" \
+            --body "This PR adds hello.txt with greeting message."
