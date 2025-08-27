@@ -38,7 +38,11 @@ jobs:
           git checkout -b aly
           git add hello.txt
           git commit -m "Add hello.txt"
-
+      - name: Push changes to new branch
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: |
+            "timeout 30s git push --verbose origin aly"
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v6
@@ -49,12 +53,7 @@ jobs:
           title: "Add hello.txt"
           body: "This PR adds hello.txt with greeting message."
 
-        
-      - name: Push changes to new branch
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-        run: |
-            "timeout 30s git push --verbose origin aly"
+      
   
 
 
