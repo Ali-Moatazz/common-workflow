@@ -43,7 +43,7 @@ jobs:
         env:
           GH_APP_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
-          git push 
+          git push --set-upstream origin aly
 
             
       - name: Create Pull Request
