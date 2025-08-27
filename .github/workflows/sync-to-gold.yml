@@ -1,16 +1,14 @@
-name: My Workflow
+name: Sync to Gold Repo
 
 on:
   workflow_dispatch:
 
 jobs:
   generate-token:
-    name: Generate GitHub App token
+    name: Generate GitHub App Token
     runs-on: ubuntu-latest
-    env:
-       APP_ID: ${{ secrets.APP_ID }} 
-      
-    
+    outputs:
+      app-token: ${{ steps.app-token.outputs.token }}
     steps:
       - id: app-token
         uses: actions/create-github-app-token@v1
@@ -18,28 +16,12 @@ jobs:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.PEMCONTENTS }}
 
-      - name: print app id
-        run: |
-          echo -n "$APP_ID" | xxd -ps
-
-         
-          
-
-      - name: set output
-        run: |
-          echo "app-token=${{ steps.app-token.outputs.token }}" >> $GITHUB_OUTPUT
-          
-
   checkout-to-gold:
-    name: Checkout to gold repo
+    name: Checkout and Update Gold Repo
     runs-on: ubuntu-latest
     needs: generate-token
-      
     steps:
-      - name: print variabble
-        run: |
-          echo "Using token: ${{ needs.generate-token.outputs.app-token }}"
-      - id: checkout
+      - name: Checkout gold repo
         uses: actions/checkout@v4
         with:
           repository: Ali-Moatazz/gold
@@ -62,9 +44,9 @@ jobs:
       - name: Push changes to new branch
         run: git push origin HEAD:my-branch
         working-directory: gold
-        env: 
+        env:
           GITHUB_TOKEN: ${{ needs.generate-token.outputs.app-token }}
-        
+
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v6
@@ -75,8 +57,8 @@ jobs:
           base: main
           title: "Add hello.txt"
           body: "This PR adds hello.txt with greeting message."
-          
-      - name: Merge Pull Request
+
+      - name: Enable Auto-Merge
         uses: peter-evans/enable-pull-request-automerge@v3
         with:
           token: ${{ needs.generate-token.outputs.app-token }}
