@@ -36,7 +36,6 @@ jobs:
           git checkout -b aly
           git add hello.txt
           git commit -m "Add hello.txt" || echo "No changes to commit"
-        working-directory: gold
 
       - name: Create Pull Request
         id: cpr
