@@ -76,8 +76,10 @@ jobs:
             --head aly \
             --title "Add hello.txt" \
             --body "This PR adds hello.txt with greeting message."
+              echo "PR_NUMBER=$pr_number" >> $GITHUB_ENV
             
       - name: Enable auto-merge
-        run: gh pr merge --auto --delete-branch --squash "$PR_NUMBER" # Replace $PR_NUMBER with the actual PR number or a variable
-        env:
-            GH_APP_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: |
+          gh pr merge $PR_NUMBER --squash --auto
+      
+            
