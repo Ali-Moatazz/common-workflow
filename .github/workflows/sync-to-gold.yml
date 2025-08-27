@@ -28,6 +28,8 @@ jobs:
         run: |
           touch hello.txt
           echo "Hello Ali" > hello.txt
+          cat hello.txt
+          ls
 
       - name: Commit changes
         run: |
