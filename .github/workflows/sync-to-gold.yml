@@ -43,7 +43,7 @@ jobs:
         env:
           GH_APP_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
-          git push https://x-access-token:${GH_APP_TOKEN}@github.com/Ali-Moatazz/common-workflow.git aly
+          git push 
 
             
       - name: Create Pull Request
