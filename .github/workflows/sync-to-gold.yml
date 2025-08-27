@@ -19,17 +19,11 @@ jobs:
 
       - name: Checkout gold- repo
         uses: actions/checkout@v4
-        with:
-          repository: Ali-Moatazz/gold
-          token: ${{ steps.generate-token.outputs.token }}
-          path: gold
+        # with:
+        #   repository: Ali-Moatazz/gold
+        #   token: ${{ steps.generate-token.outputs.token }}
+        #   path: gold
           
-      - name: Install GitHub CLI
-        run: |
-          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/etc/apt/keyrings/githubcli-archive-keyring.gpg
-          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/githubcli.list > /dev/null
-          sudo apt update
-          sudo apt install gh
       - name: Create hello.txt
         run: echo "Hello Ali" > hello.txt
         working-directory: gold
@@ -45,16 +39,14 @@ jobs:
 
       - name: Create Pull Request
         id: cpr
-        run: |
-          "gh pr create --base main --head aly"
-        # uses: peter-evans/create-pull-request@v6
-        # with:
-        #   token: ${{ steps.generate-token.outputs.token }}
-        #   path: gold
-        #   branch: aly
-        #   base: main
-        #   title: "Add hello.txt"
-        #   body: "This PR adds hello.txt with greeting message."
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          path: gold
+          branch: aly
+          base: main
+          title: "Add hello.txt"
+          body: "This PR adds hello.txt with greeting message."
 
         
       - name: Push changes to new branch
