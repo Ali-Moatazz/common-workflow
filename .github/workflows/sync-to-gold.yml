@@ -30,11 +30,19 @@ jobs:
           echo "Hello Ali" > hello.txt
           cat hello.txt
           ls
+          
+      - name: Configure Git credentials
+        run: |
+            echo "https://x-access-token:${{ steps.generate-token.outputs.token }}@github.com" > ~/.git-credentials
+            git config --global credential.helper store
+            git config --global user.name "mynameisaly[bot]"
+            git config --global user.email "mynameisaly[bot]@users.noreply.github.com"
+            # git config user.name "github-actions[bot]"
+            # git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Commit changes
         run: |
-          git config --global user.name "mynameisaly[bot]"
-          git config --global user.email "mynameisaly[bot]@users.noreply.github.com"
+
           git checkout -b aly
           git add hello.txt
           git commit -m "Add hello.txt"
