@@ -10,8 +10,7 @@ jobs:
     env:
        APP_ID: ${{ secrets.APP_ID }} 
       
-    outputs: 
-      app-token: ${{ steps.app-token.outputs.token }}
+    
     steps:
       - id: app-token
         uses: actions/create-github-app-token@v1
@@ -46,6 +45,7 @@ jobs:
           repository: Ali-Moatazz/gold-
           token: ${{ needs.generate-token.outputs.app-token }}
           path: gold
+          persist-credentials: false
 
       - name: Create hello.txt
         run: echo "Hello Ali" > hello.txt
