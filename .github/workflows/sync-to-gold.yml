@@ -42,10 +42,10 @@ jobs:
         working-directory: gold
 
       - name: Push changes to new branch
-        run: timeout 30s git push --verbose origin HEAD:my-branch
+        run: |
+          git remote set-url origin https://x-access-token:${{ steps.generate-token.outputs.token }}@github.com/Ali-Moatazz/gold-.git
+          timeout 30s git push --verbose origin HEAD:my-branch
         working-directory: gold
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
 
       - name: Create Pull Request
         id: cpr
