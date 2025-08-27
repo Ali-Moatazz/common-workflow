@@ -26,6 +26,7 @@ jobs:
           
       - name: whereami
         run: |
+          cd gold
           pwd
           ls  
           
