@@ -37,7 +37,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b aly
           git add hello.txt
-          git commit -m "Add hello.txt" || echo "No changes to commit"
+          git commit -m "Add hello.txt"
 
       - name: Create Pull Request
         id: cpr
@@ -45,7 +45,7 @@ jobs:
         with:
           token: ${{ steps.generate-token.outputs.token }}
           branch: aly
-          base: main
+          # base: main
           title: "Add hello.txt"
           body: "This PR adds hello.txt with greeting message."
 
