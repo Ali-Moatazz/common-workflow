@@ -36,7 +36,7 @@ jobs:
         working-directory: gold
 
       - name: Push changes to new branch
-        run: git push origin HEAD:my-branch
+        run: git push origin HEAD:main
         working-directory: gold
         env:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
