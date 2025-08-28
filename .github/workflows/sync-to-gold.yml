@@ -82,4 +82,4 @@ jobs:
       - name: Enable auto-merge
         run: |
           cd gold
-          gh pr merge $PR_NUMBER --squash --auto
+          gh pr merge $PR_NUMBER --squash --admin
